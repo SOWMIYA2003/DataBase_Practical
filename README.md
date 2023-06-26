@@ -123,3 +123,132 @@ SELECT BookId , REVERSE(Author) AS ReverseAuthor FROM BookDetails WHERE BookId<=
 SELECT SPACE('7') AS SPACE;
 SELECT TRIM(BookName) AS TrimBookName FROM BookDetails WHERE BookId<=103;
 ```
+### Implicit Cursor
+```
+CREATE TABLE Employee (
+  Empid int,
+  EmpName varchar(255),
+  Designation varchar(255),
+  Salary float
+);
+
+INSERT INTO Employee VALUES(101,'Harshh','Manager',20000);
+INSERT INTO Employee VALUES(102,'Denver','Sales Analyst',10000);
+INSERT INTO Employee VALUES(103,'Travis','CFO',30000);
+INSERT INTO Employee VALUES(104,'Scott','Sales Analyst',10000);
+INSERT INTO Employee VALUES(105,'Yash','CEO',40000);
+INSERT INTO Employee VALUES(106,'Grey','Marketing',25000);
+INSERT INTO Employee VALUES(107,'Jammie','Agent',10000);
+
+
+SELECT *FROM Employee;
+/* %FOUND %ROWCOUNT insert*/
+BEGIN
+INSERT INTO Employee VALUES (101,'Ana','Agent',15000);
+IF SQL%FOUND then
+dbms_output.put_line('Rows Inserted : ' || SQL%ROWCOUNT);
+ELSE
+dbms_output.put_line('No Rows inserted');
+END IF;
+END;
+/
+    
+SELECT *FROM Employee;
+/* update */
+BEGIN
+UPDATE Employee
+set EmpName='Swati',Designation='Marketing'
+where Empid = 102;
+IF SQL%ROWCOUNT > 0 then
+dbms_output.put_line('Rows Updated : ' ||SQL%ROWCOUNT);
+COMMIT;
+ELSE
+dbms_output.put_line('Rows Not Updated');
+END IF;
+END;
+/
+    
+SELECT *FROM Employee;
+/* isopen delete*/
+BEGIN
+DELETE FROM Employee WHERE Empid>104;
+IF SQL%ISOPEN then
+dbms_output.put_line('Rows Updated in IF : '|| SQL%ROWCOUNT);
+ELSE
+dbms_output.put_line('Rows Updated in ELSE : '|| SQL%ROWCOUNT);
+END IF;
+END;
+/
+/* not found*/ 
+BEGIN
+IF SQL%NOTFOUND then
+dbms_output.put_line('No data in table');
+ELSE
+dbms_output.put_line('Table Conatins Data');
+END IF;
+END;
+/
+    
+SELECT *FROM Employee;
+
+BEGIN
+DELETE FROM Employee;
+IF SQL%ISOPEN then
+dbms_output.put_line('Rows Updated in IF : '|| SQL%ROWCOUNT);
+ELSE
+dbms_output.put_line('Rows Updated in ELSE : '|| SQL%ROWCOUNT);
+END IF;
+END;
+/
+
+BEGIN
+DELETE FROM Employee WHERE Empid=101;
+IF SQL%NOTFOUND then
+dbms_output.put_line('No data in table');
+ELSE
+dbms_output.put_line('Table Conatins Data');
+END IF;
+END;
+/
+
+SELECT *FROM Employee;
+```
+### Explicit Cursor
+```
+CREATE TABLE Employee (
+  Empid int,
+  EmpName varchar(255),
+  Designation varchar(255),
+  Salary float
+);
+
+INSERT INTO Employee VALUES(101,'Harshh','Manager',20000);
+INSERT INTO Employee VALUES(102,'Denver','Sales Analyst',10000);
+INSERT INTO Employee VALUES(103,'Travis','CFO',30000);
+INSERT INTO Employee VALUES(104,'Scott','Sales Analyst',10000);
+INSERT INTO Employee VALUES(105,'Yash','CEO',40000);
+INSERT INTO Employee VALUES(106,'Grey','Marketing',25000);
+INSERT INTO Employee VALUES(107,'Jammie','Agent',10000);
+
+SELECT *FROM Employee;
+
+DECLARE 
+e_id Employee.Empid%type;
+e_name Employee.EmpName%type;
+e_salary Employee.Salary%type;
+CURSOR e_employee IS
+    select Empid ,EmpName,Salary From Employee;
+BEGIN
+OPEN e_employee;
+LOOP
+    FETCH e_employee INTO e_id,e_name,e_salary;
+EXIT WHEN e_employee%NOTFOUND;
+DBMS_OUTPUT.PUT_LINE('Employee ID: ' || e_id);
+DBMS_OUTPUT.PUT_LINE('Employee Name: ' || e_name);
+DBMS_OUTPUT.PUT_LINE('Employee Salary: ' || e_salary);
+DBMS_OUTPUT.PUT_LINE('-------------------');
+END LOOP;
+CLOSE e_employee;
+END;
+/
+```
