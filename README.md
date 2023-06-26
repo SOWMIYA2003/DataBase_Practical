@@ -252,3 +252,62 @@ CLOSE e_employee;
 END;
 /
 ```
+### Exception Handling
+```
+CREATE TABLE Employee (
+  Empid int,
+  EmpName varchar(255),
+  Designation varchar(255),
+  Salary float
+);
+
+INSERT INTO Employee VALUES(101,'Harshh','Manager',20000);
+INSERT INTO Employee VALUES(102,'Denver','Sales Analyst',10000);
+INSERT INTO Employee VALUES(103,'Travis','CFO',30000);
+INSERT INTO Employee VALUES(104,'Scott','Sales Analyst',10000);
+INSERT INTO Employee VALUES(105,'Yash','CEO',40000);
+INSERT INTO Employee VALUES(106,'Grey','Marketing',25000);
+INSERT INTO Employee VALUES(107,'Jammie','Agent',10000);
+INSERT INTO Employee VALUES (101,'Pree','MD',34000);
+
+SELECT *FROM Employee;
+
+DECLARE 
+e_name Employee.EmpName%type;
+e_salary Employee.Salary%type;
+
+BEGIN
+SELECT EmpName,Salary INTO e_name,e_salary FROM Employee WHERE Empid = 101;
+dbms_output.put_line(e_name ||' earns '|| e_salary);
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+    	dbms_output.put_line('No Records');
+	WHEN TOO_MANY_ROWS THEN
+        dbms_output.put_line('More than 1 Record Found');
+   	WHEN OTHERS THEN 
+        dbms_output.put_line('Some error found');
+END;
+/
+
+DECLARE 
+e_name Employee.EmpName%type;
+e_salary Employee.Salary%type;
+e_invalid_designation EXCEPTION;
+BEGIN
+UPDATE Employee SET Salary=Salary+200 WHERE Designation = 'HR';
+IF SQL%NOTFOUND THEN
+RAISE e_invalid_designation;
+END IF;
+COMMIT;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+    	dbms_output.put_line('No Records');
+	WHEN TOO_MANY_ROWS THEN
+        dbms_output.put_line('More than 1 Record Found');
+	WHEN e_invalid_designation THEN
+        dbms_output.put_line('Invalid Designation');
+   	WHEN OTHERS THEN 
+        dbms_output.put_line('Some error found');
+END;
+/
+```
